@@ -1,0 +1,521 @@
+    <!DOCTYPE html>
+    <!-- CSP support mode (required for Windows Universal apps): https://docs.angularjs.org/api/ng/directive/ngCsp -->
+    <html lang="en" ng-app="app" ng-csp>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes" /> 
+      <!-- JS dependencies (order matters!) -->
+      <script src="scripts/platformOverrides.js"></script>
+      <script src="lib/angular/angular.js"></script>
+      <script src="lib/onsen/js/onsenui.js"></script>
+
+      <!-- UI dependency for grid -->
+      <link rel="stylesheet" href="styles/bootstrap.min.css">
+    
+
+      <!-- CSS dependencies -->
+      <link rel="stylesheet" href="lib/onsen/css/onsenui.css" />
+      <link rel="stylesheet" href="lib/onsen/css/onsen-css-components-sunshine-theme.css" />
+
+      <!-- CSP support mode (required for Windows Universal apps) -->
+      <link rel="stylesheet" href="lib/angular/angular-csp.css" />
+      <link rel="stylesheet" href="styles/app.css" />
+      <link rel="stylesheet" type="text/css" href="./styles/index-test.css">
+      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqprAaHaPSAeckDKHQF87RyAlQjpbnNrQ"></script>
+     
+      <!-- --------------- App init --------------- --> 
+      <title>NISPSASM</title> 
+    </head> 
+    <body ng-controller="SmartShopCtrl" onload="init()">
+      <!-- Cordova reference -->
+       
+      <script src="scripts/index.js"></script>
+      <script src="cordova.js"></script>
+      <!-- --> 
+
+
+      <ons-modal var="modal">
+      <ons-icon icon="ion-load-c" spin="true"></ons-icon>
+      <br><br>Please wait.<br>Processing request.
+    </ons-modal>
+
+     <ons-modal var="regstatus">
+      <ons-icon icon="ion-load-c" spin="true"></ons-icon>
+      <br><br>Please wait...<br>Loading Components 
+    </ons-modal> 
+
+    <ons-sliding-menu
+    main-page="home.html"
+    menu-page="menu.html"       
+    side="left" type="overlay" swipeable="false" max-slide-distance="80%"
+    max-slide-distance="250px"
+    var="menu">
+  </ons-sliding-menu>
+
+  <!-- Application Menu -->
+
+  <ons-template id="menu.html" >
+  <ons-page modifier="menubg"> 
+  </ons-page>
+  </ons-template>
+
+  <ons-template id="home.html" > 
+     <ons-navigator var="main_navigator">
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+        <div class="center font-color">NISPSAS Monitoring</div> 
+        
+      </ons-toolbar>
+      <ons-list-header class="headtitle">Current Location: {{lat}},{{lng}}</ons-list-header> 
+      <div style="height:80%;" id="trackmapp"></div>
+       
+      
+          <!--<button class="loadbtn btn bgm-teal btn-hash theme-btn waves-effect" ng-click="displayReport()">View Reports</button>-->
+            <div class="cover-label">  
+                <button class="button button--large--cta home1" ng-click="displayReport()">Report <i class="fa fa-dashboard"></i></button>
+                <button class="button button--large home2 " ng-click="main_navigator.pushPage('reglist.html', {animation : 'none'}); ">Registration <i class="fa fa-angle-right"></i></button>
+            </div> 
+      
+      </ons-page>
+    </ons-navigator> 
+  </ons-template> 
+
+  <ons-template id="report.html" >  
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+         <div class="left" >
+          <ons-back-button></ons-back-button>
+        </div>
+        <div class="center font-color">All NISPSAS Reports</div> 
+        <div class="right font-color" ng-click="clearLogs()" style="padding:15px">Clear</div> 
+      </ons-toolbar>
+      <ons-lazy-load>
+      <ons-list-header class="headtitle">Number of Reports: {{reports.length}}</ons-list-header> 
+     
+      <ons-list-item ng-repeat="report in reports" modifier="chevron" >
+        <div class="list-title" ng-click="reportdetails(report)">{{report.phonenumber}}</div>
+        
+      </ons-list-item> 
+      </ons-lazy-load>
+       
+       <ons-bottom-toolbar style="text-align:center">
+          <button class="loadbtn btn bgm-teal btn-hash theme-btn waves-effect" ng-click="main_navigator.pushPage('report.html', {animation : 'slide'});">Load more</button>
+       </ons-bottom-toolbar>
+      </ons-page>
+  </ons-template>
+
+    <ons-template id="reglist.html" >  
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+         <div class="left" >
+          <ons-back-button></ons-back-button>
+        </div>
+        <div class="center font-color">All Registration</div> 
+      </ons-toolbar>
+      <ons-list modifier="cheveron" style="margin-top:20px;">
+        
+        <ons-list-item modifier="cheveron" ng-click="showPoliceForm()">
+          <div class="left">
+            <img class="list-item__thumbnail" src="img/nigeria_police.png">
+          </div>
+          <div class="center">
+            Register Police Station
+          </div>
+        </ons-list-item>
+
+        <ons-list-item modifier="cheveron" ng-click="showPrisonForm()">
+          <div class="left">
+            <img class="list-item__thumbnail" src="img/prison_service.png">
+          </div>
+          <div class="center">
+            Register Prison Station
+          </div>
+        </ons-list-item>
+
+        <ons-list-item modifier="cheveron" ng-click="showNSCDCForm()">
+          <div class="left">
+            <img class="list-item__thumbnail" src="img/civil_defence.png">
+          </div>
+          <div class="center">
+            Register NSCDC Station
+          </div>
+        </ons-list-item>
+
+        <ons-list-item modifier="cheveron" ng-click="showFireEngineForm()">
+          <div class="left">
+            <img class="list-item__thumbnail" src="img/fire_service.png">
+          </div>
+          <div class="center">
+            Register Fire Engine Station
+          </div>
+        </ons-list-item>
+
+        <ons-list-item modifier="cheveron" ng-click="showImmigrationForm()">
+          <div class="left">
+            <img class="list-item__thumbnail" src="img/immigration.png">
+          </div>
+          <div class="center">
+            Register Immigration Station
+          </div>
+        </ons-list-item>   
+      
+      </ons-list>      
+      </ons-page>
+  </ons-template> 
+
+<ons-template id="policeForm.html">
+  <ons-page modifier="" style="height:100%;">
+    <ons-toolbar>
+      <div class="left">
+        <ons-back-button></ons-back-button>
+      </div>
+      <div class="center font-color">Register Police Station</div>
+    </ons-toolbar>
+    <div class="whitepod" style="margin:10px 0px; padding:10px;">
+      <div>
+        <div class="heading">
+          To Register a Police Station, Kindly Fill the Form at the Police Station Outlet Location
+        </div>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="login-row">
+        <select class="sl form-sel" ng-model="policedetails.commandofficer">
+          <option>Select Command officer Type</option>
+          <option>Commandant General</option>
+          <option>Zonal Commander</option>
+          <option>State Commandant</option>
+          <option>Area Commander</option>
+          <option>Division Officer</option>
+          <option>Station Officer</option>
+        </select>
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Police Station Name"
+          ng-model="policedetails.stationname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Name of Commanding Officer"
+          ng-model="policedetails.fullname">
+        <input type="number" class="text-input--underbar login-input sl" placeholder="Phone Number"
+          ng-model="policedetails.phonenumber">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Address"
+          ng-model="policedetails.address">
+        <select class="sl form-sel" ng-model="policedetails.stateoforigin">
+          <option>Select State</option>
+          <option ng-repeat="state in states">{{state}}</option>
+        </select>
+        <select class="sl form-sel" ng-model="policedetails.lga" required>
+          <option>LGA</option>
+          <option ng-repeat="lga in statelga | filter:{statename:policedetails.stateoforigin}">{{lga.name}}</option>
+        </select>
+      </div>
+      <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce"
+        ng-click="RegPolice()">Submit</ons-button>
+    </div>
+
+
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="prisonForm.html">
+  <ons-page modifier="" style="height:100%;">
+    <ons-toolbar>
+      <div class="left">
+        <ons-back-button></ons-back-button>
+      </div>
+      <div class="center font-color">Register Prison Station</div>
+    </ons-toolbar>
+    <div class="whitepod" style="margin:10px 0px; padding:10px;">
+      <div>
+        <div class="heading">
+          To Register a Prison Station, Kindly Fill the Form at the Prison Station Outlet Location
+        </div>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="login-row">
+        <select class="sl form-sel" ng-model="prison.commandofficer">
+          <option>Select Command officer Type</option>
+          <option>Commandant General</option>
+          <option>Zonal Commander</option>
+          <option>State Commandant</option>
+          <option>Area Commander</option>
+          <option>Division Officer</option>
+          <option>Station Officer</option>
+        </select>
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Prison Station Name"
+          ng-model="prison.stationname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Name of Commanding Officer"
+          ng-model="prison.fullname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Phone Number"
+          ng-model="prison.phonenumber">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Address" ng-model="prison.address">
+        <select class="sl form-sel" ng-model="prison.stateoforigin">
+          <option>Select State</option>
+          <option ng-repeat="state in states">{{state}}</option>
+        </select>
+        <select class="sl form-sel" ng-model="prison.lga" required>
+          <option>LGA</option>
+          <option ng-repeat="lga in statelga | filter:{statename:prison.stateoforigin}">{{lga.name}}</option>
+        </select> </div>
+      <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce"
+        ng-click="RegPrison()">Submit</ons-button>
+    </div>
+
+
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="immigrationForm.html">
+  <ons-page modifier="" style="height:100%;">
+    <ons-toolbar>
+      <div class="left">
+        <ons-back-button></ons-back-button>
+      </div>
+      <div class="center font-color">Register Immigration Station</div>
+    </ons-toolbar>
+    <div class="whitepod" style="margin:10px 0px; padding:10px;">
+      <div>
+        <div class="heading">
+          To Register a Immigration Station, Kindly Fill the Form at the Immigration Station Outlet Location
+        </div>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="login-row">
+        <select class="sl form-sel" ng-model="immigrationdetails.commandofficer">
+          <option>Select Command officer Type</option>
+          <option>Commandant General</option>
+          <option>Zonal Commander</option>
+          <option>State Commandant</option>
+          <option>Area Commander</option>
+          <option>Division Officer</option>
+          <option>Station Officer</option>
+        </select>
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Immigration Station Name"
+          ng-model="immigrationdetails.stationname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Name of Commanding Officer"
+          ng-model="immigrationdetails.fullname">
+        <input type="number" class="text-input--underbar login-input sl" placeholder="Phone Number"
+          ng-model="immigrationdetails.phonenumber">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Address"
+          ng-model="immigrationdetails.address">
+        <select class="sl form-sel" ng-model="immigrationdetails.stateoforigin">
+          <option>Select State</option>
+          <option ng-repeat="state in states">{{state}}</option>
+        </select>
+        <select class="sl form-sel" ng-model="immigrationdetails.lga" required>
+          <option>LGA</option>
+          <option ng-repeat="lga in statelga | filter:{statename:immigrationdetails.stateoforigin}">{{lga.name}}
+          </option>
+        </select> </div>
+      <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce"
+        ng-click="RegImmigration()">Submit</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="nscdcForm.html">
+  <ons-page modifier="" style="height:100%;">
+    <ons-toolbar>
+      <div class="left">
+        <ons-back-button></ons-back-button>
+      </div>
+      <div class="center font-color">Register NSCDC Station</div>
+    </ons-toolbar>
+    <div class="whitepod" style="margin:10px 0px; padding:10px;">
+      <div>
+        <div class="heading">
+          To Register a NSCDC Station, Kindly Fill the Form at the NSCDC Station Outlet Location
+        </div>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="login-row">
+        <select class="sl form-sel" ng-model="nscdcdetails.commandofficer">
+          <option>Select Command officer Type</option>
+          <option>Commandant General</option>
+          <option>Zonal Commander</option>
+          <option>State Commandant</option>
+          <option>Area Commander</option>
+          <option>Division Officer</option>
+          <option>Station Officer</option>
+        </select>
+        <input type="text" class="text-input--underbar login-input sl" placeholder="NSCDC Station Name"
+          ng-model="nscdcdetails.stationname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Name of Commanding Officer"
+          ng-model="nscdcdetails.fullname">
+        <input type="number" class="text-input--underbar login-input sl" placeholder="Phone Number"
+          ng-model="nscdcdetails.phonenumber">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Address"
+          ng-model="nscdcdetails.address">
+        <select class="sl form-sel" ng-model="nscdcdetails.stateoforigin">
+          <option>Select State</option>
+          <option ng-repeat="state in states">{{state}}</option>
+        </select>
+        <select class="sl form-sel" ng-model="nscdcdetails.lga" required>
+          <option>LGA</option>
+          <option ng-repeat="lga in statelga | filter:{statename:nscdcdetails.stateoforigin}">{{lga.name}}</option>
+        </select> </div>
+      <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce"
+        ng-click="RegNSCDC()">Submit</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="fireEngineForm.html">
+  <ons-page modifier="" style="height:100%;">
+    <ons-toolbar>
+      <div class="left">
+        <ons-back-button></ons-back-button>
+      </div>
+      <div class="center font-color">Register Fire Engine Station</div>
+    </ons-toolbar>
+    <div class="whitepod" style="margin:10px 0px; padding:10px;">
+      <div>
+        <div class="heading">
+          To Register a Fire Engine Station, Kindly Fill the Form at the Fire Engine Station Outlet Location
+        </div>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="login-row">
+        <select class="sl form-sel" ng-model="FireEngine.commandofficer">
+          <option>Select Command officer Type</option>
+          <option>Commandant General</option>
+          <option>Zonal Commander</option>
+          <option>State Commandant</option>
+          <option>Area Commander</option>
+          <option>Division Officer</option>
+          <option>Station Officer</option>
+        </select>
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Name of Fire Station"
+        ng-model="FireEngine.stationname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Name of Commanding Officer"
+          ng-model="FireEngine.fullname">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Fire Station Tel. No"
+        ng-model="FireEngine.phonenumber">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Address" ng-model="FireEngine.address">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Type of Engine" ng-model="FireEngine.type">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Number of Fire Engine"
+        ng-model="FireEngine.nofireengine">
+        <input type="text" class="text-input--underbar login-input sl" placeholder="Capacity" ng-model="FireEngine.capacity">
+        <select class="sl form-sel" ng-model="FireEngine.category">
+        <option>Select Category</option>
+        <option>Federal</option>
+        <option>State</option>
+        <option>Private</option>
+        </select>  
+        <select class="sl form-sel" ng-model="FireEngine.stateoforigin">
+          <option>Select State</option>
+          <option ng-repeat="state in states">{{state}}</option>
+        </select>
+        <select class="sl form-sel" ng-model="FireEngine.lga" required>
+          <option>LGA</option>
+          <option ng-repeat="lga in statelga | filter:{statename:FireEngine.stateoforigin}">{{lga.name}}</option>
+        </select>
+      </div>
+      <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce"
+        ng-click="RegEngine()">Submit</ons-button>
+    </div>
+
+  </ons-page>
+</ons-template>
+
+  <ons-template id="houseplan.html" >  
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+         <div class="left" >
+          <ons-back-button></ons-back-button>
+        </div>
+        <div class="center font-color">HOUSE PLAN</div> 
+      </ons-toolbar>
+        <div class="whitepod" style="margin:10px 0px; padding:10px;">
+          <img id="houseplan" style="height:auto;width:100%;">
+      </div>
+      </ons-page>
+  </ons-template>
+
+   <ons-template id="insert.html" >  
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+         <div class="left" >
+          <!--<ons-back-button></ons-back-button>-->
+        </div>
+        <div class="center font-color">NISPSAS Agent Setup</div> 
+      </ons-toolbar>
+        <div class="whitepod" style="margin:10px 0px; padding:10px;">
+        <div >
+          <div class="heading">
+          To Use NISPSAS Monitoring App, kindly set up your one time profile 
+         </div> 
+       </div> 
+      </div>
+       <div class="login-form"> 
+          <div class="login-row">
+            <input type="text" class="text-input--underbar login-input sl" placeholder="Location Group" ng-model="nispsasagent.fullname">
+            <input type="text" class="text-input--underbar login-input sl" placeholder="Phone Number" ng-model="nispsasagent.phone"></div> 
+          <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce" ng-click="RegAgent()">Register</ons-button> 
+        </div> 
+      </ons-page>
+  </ons-template> 
+
+   <ons-template id="disarm.html" >  
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+         <div class="left" >
+          <ons-back-button></ons-back-button>
+        </div>
+        <div class="center font-color">Disarm Distress Alert</div> 
+      </ons-toolbar>
+        <div class="whitepod" style="margin:10px 0px; padding:10px;">
+        <div >
+          <div class="heading">
+          To Disarm an Alert, You must be at the location of Inccidence then kindly fill the Disarm Form below and upload site picture
+         </div> 
+       </div> 
+      </div>
+       <div class="login-form"> 
+                <div class="login-row">
+                <img ng-if="disarm.picture" style="height:200px;" ng-src="{{disarm.picture}}"/>
+                  <textarea type="text"  class="text-input--underbar login-input sl textarea"  placeholder="Share a report on the incident scene"  ng-model="disarm.message"></textarea>
+                 
+                  <ons-list>
+                    <ons-list-item ng-click="takePicture()"><i class="fa fa-camera pic-icon"></i>Take Picture</ons-list-item>
+                    <ons-list-item ng-click="selectPicture()"><i class="fa fa-file-picture-o pic-icon" ></i>Choose Picture</ons-list-item>
+                  </ons-list>
+                </div> 
+                <ons-button modifier="large" class="login-button home1 login-btn2 signup-btn" style="background-color:#1ca809ce" ng-click="DisarmReport()">Submit</ons-button> 
+        </div>
+      </ons-page>
+  </ons-template> 
+
+
+    <ons-template id="reportdetails.html" >   
+      <ons-page modifier="" style="height:100%;"> 
+      <ons-toolbar>
+       <div class="left">
+             <ons-back-button></ons-back-button>
+        </div>
+        <div class="center font-color">Report Information</div> 
+      </ons-toolbar>
+      <ons-list-header class="headtitle">Phone Number: {{report.phonenumber}}</ons-list-header> 
+      <div style="height:80%;" id="reportmapp"></div>
+      
+        <div class="cover-label">  
+                <button class="button button--large--cta home1" ng-click="showdisarmform()">Disarm <i class="fa fa-close"></i></button>
+                <button class="button button--large home2 " ng-click="deleteReport(report)">Delete <i class="fa fa-trash"></i></button>
+            </div> 
+      
+      </ons-page>
+     
+  </ons-template> 
+
+  <script src="js/jquery.min.js"></script> 
+    
+  <script src="js/app.js"></script>
+ 
+  </body>
+  </html>
